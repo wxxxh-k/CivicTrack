@@ -19,3 +19,6 @@ def _bbox():
 # (min_lat, min_lng, max_lat, max_lng): projects outside this box are rejected. Defaults to the Chennai region.
 SERVICE_BBOX = _bbox()
 MAX_LINE_M = float(os.getenv("MAX_LINE_M", "5000"))
+
+# Load demo records only when there is no seed_data.json. Set false in production.
+SEED_DEMO = os.getenv("SEED_DEMO", "true").lower() == "true"

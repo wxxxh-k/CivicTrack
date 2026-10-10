@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from ..config import ADMIN_RESET_KEY, MAX_LINE_M, SERVICE_BBOX
 from ..database import get_db
 from ..models import Project, Report, ProjectUpdate, WeatherCache
-from ..seed import seed
+from ..seed import load_seed_file, seed
 
 router = APIRouter(prefix="/api")
 
@@ -34,7 +34,8 @@ def reset_demo(x_admin_key: Optional[str] = Header(default=None), db: Session = 
     for model in (Report, ProjectUpdate, Project):
         db.query(model).delete()
     db.commit()
-    seed(db)
+    if not load_seed_file(db):
+        seed(db)
     return {"reset": True}
 
 

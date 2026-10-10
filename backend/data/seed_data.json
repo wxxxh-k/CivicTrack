@@ -1,0 +1,304 @@
+{
+ "departments": [
+  "Corporation Works"
+ ],
+ "projects": [
+  {
+   "ref": "CT-010",
+   "department": "Corporation Works",
+   "planned_start": "2026-11-02",
+   "planned_end": "2026-12-31",
+   "original_end": "2026-12-31",
+   "title": "Improvement of the Existing BT Road at Mambalam High Road in Division-113, Unit-26, Zone-09",
+   "work_type": "Road",
+   "area": "Mambalam, Zone 09",
+   "contractor": "To be announced",
+   "state": null,
+   "progress": 0,
+   "budget_inr": 4860000,
+   "delay_reason": null,
+   "description": "Relaying (IRR) under the Special Fund Road Works scheme, source of fund: Own Sources. Estimate number NJ/2025-26/1877 dated 23-04-2025, office NJ-TEYNAMPET, Division 113, Unit 26. The source does not give work dates, so the dates here are placeholders.",
+   "geometry": [
+    [
+     80.26338043461298,
+     13.0264381295915
+    ],
+    [
+     80.26423895064966,
+     13.02963664796339
+    ]
+   ],
+   "slips": 0,
+   "source": "import",
+   "tender_id": "NJ/2025-26/1877",
+   "source_url": null,
+   "dates_estimated": true
+  },
+  {
+   "ref": "CT-011",
+   "department": "Corporation Works",
+   "planned_start": "2026-11-02",
+   "planned_end": "2026-11-23",
+   "original_end": "2026-11-23",
+   "title": "Restoration of Road Cut (BT Road) made by CMWSSB at Sakthi Nagar Main Road (link)",
+   "work_type": "Road",
+   "area": "Zone 15 Sholinganallur",
+   "contractor": "To be announced",
+   "state": null,
+   "progress": 0,
+   "budget_inr": 931000,
+   "delay_reason": null,
+   "description": "Restoration of the road after a cut made by the water board (CMWSSB). Amount is the tender amount in the listing. The listing does not give work dates, so the dates here are placeholders. Zone 15, Division 193, Unit 45.",
+   "geometry": [
+    [
+     80.242,
+     13.01
+    ],
+    [
+     80.244,
+     13.0105
+    ],
+    [
+     80.246,
+     13.0112
+    ],
+    [
+     80.248,
+     13.0118
+    ]
+   ],
+   "slips": 0,
+   "source": "import",
+   "tender_id": null,
+   "source_url": "https://gittigo.com/tender/authority/Corporation-of-Chennai",
+   "dates_estimated": true
+  },
+  {
+   "ref": "CT-012",
+   "department": "Corporation Works",
+   "planned_start": "2026-11-09",
+   "planned_end": "2026-11-30",
+   "original_end": "2026-11-30",
+   "title": "Restoration of Road Cut (BT Road) made by CMWSSB at Shanthi Niketan Colony 3rd to 8th Street",
+   "work_type": "Road",
+   "area": "Zone 15 Sholinganallur",
+   "contractor": "To be announced",
+   "state": null,
+   "progress": 0,
+   "budget_inr": 1998000,
+   "delay_reason": null,
+   "description": "Restoration of the road after a cut made by the water board (CMWSSB). Amount is the tender amount in the listing. The listing does not give work dates, so the dates here are placeholders. Zone 15, Division 193, Unit 45.",
+   "geometry": [
+    [
+     80.25,
+     12.99
+    ],
+    [
+     80.2508,
+     12.9925
+    ],
+    [
+     80.2515,
+     12.995
+    ],
+    [
+     80.2524,
+     12.9975
+    ]
+   ],
+   "slips": 0,
+   "source": "import",
+   "tender_id": null,
+   "source_url": "https://gittigo.com/tender/authority/Corporation-of-Chennai",
+   "dates_estimated": true
+  },
+  {
+   "ref": "CT-013",
+   "department": "Corporation Works",
+   "planned_start": "2026-11-16",
+   "planned_end": "2026-12-07",
+   "original_end": "2026-12-07",
+   "title": "Restoration of Road Cut (BT Road) made by CMWSSB at Shanthi Niketan Colony 1st Main Road",
+   "work_type": "Road",
+   "area": "Zone 15 Sholinganallur",
+   "contractor": "To be announced",
+   "state": null,
+   "progress": 0,
+   "budget_inr": 1519000,
+   "delay_reason": null,
+   "description": "Restoration of the road after a cut made by the water board (CMWSSB). Amount is the tender amount in the listing. The listing does not give work dates, so the dates here are placeholders. Zone 15, Division 193, Unit 45.",
+   "geometry": [
+    [
+     80.255,
+     12.996
+    ],
+    [
+     80.2575,
+     12.9962
+    ],
+    [
+     80.26,
+     12.9965
+    ],
+    [
+     80.2625,
+     12.9968
+    ]
+   ],
+   "slips": 0,
+   "source": "import",
+   "tender_id": null,
+   "source_url": "https://gittigo.com/tender/authority/Corporation-of-Chennai",
+   "dates_estimated": true
+  },
+  {
+   "ref": "CT-014",
+   "department": "Corporation Works",
+   "planned_start": "2026-11-23",
+   "planned_end": "2026-12-14",
+   "original_end": "2026-12-14",
+   "title": "Restoration of Road Cut (BT Road) made by CMWSSB at Sai Nagar 12th, 13th and 16th Cross Street",
+   "work_type": "Road",
+   "area": "Zone 15 Sholinganallur",
+   "contractor": "To be announced",
+   "state": null,
+   "progress": 0,
+   "budget_inr": 1500000,
+   "delay_reason": null,
+   "description": "Restoration of the road after a cut made by the water board (CMWSSB). Amount is the tender amount in the listing. The listing does not give work dates, so the dates here are placeholders. Zone 15, Division 193, Unit 45.",
+   "geometry": [
+    [
+     80.23220182525465,
+     12.893339090985284
+    ],
+    [
+     80.23224475105646,
+     12.895828161489652
+    ]
+   ],
+   "slips": 0,
+   "source": "import",
+   "tender_id": null,
+   "source_url": "https://gittigo.com/tender/authority/Corporation-of-Chennai",
+   "dates_estimated": true
+  },
+  {
+   "ref": "CT-015",
+   "department": "Corporation Works",
+   "planned_start": "2026-11-30",
+   "planned_end": "2026-12-21",
+   "original_end": "2026-12-21",
+   "title": "Restoration of Road Cut (BT Road) made by CMWSSB at PVS Nagar 2nd Main Road",
+   "work_type": "Road",
+   "area": "Zone 15 Sholinganallur",
+   "contractor": "To be announced",
+   "state": null,
+   "progress": 0,
+   "budget_inr": 2478000,
+   "delay_reason": null,
+   "description": "Restoration of the road after a cut made by the water board (CMWSSB). Amount is the tender amount in the listing. The listing does not give work dates, so the dates here are placeholders. Zone 15, Division 193, Unit 45.",
+   "geometry": [
+    [
+     80.255,
+     12.996
+    ],
+    [
+     80.2575,
+     12.9962
+    ],
+    [
+     80.26,
+     12.9965
+    ],
+    [
+     80.2625,
+     12.9968
+    ]
+   ],
+   "slips": 0,
+   "source": "import",
+   "tender_id": null,
+   "source_url": "https://gittigo.com/tender/authority/Corporation-of-Chennai",
+   "dates_estimated": true
+  },
+  {
+   "ref": "CT-016",
+   "department": "Corporation Works",
+   "planned_start": "2026-12-07",
+   "planned_end": "2026-12-28",
+   "original_end": "2026-12-28",
+   "title": "Restoration of Road Cut (BT Road) made by CMWSSB at PVS Nagar 1st Main Road",
+   "work_type": "Road",
+   "area": "Zone 15 Sholinganallur",
+   "contractor": "To be announced",
+   "state": null,
+   "progress": 0,
+   "budget_inr": 2642000,
+   "delay_reason": null,
+   "description": "Restoration of the road after a cut made by the water board (CMWSSB). Amount is the tender amount in the listing. The listing does not give work dates, so the dates here are placeholders. Zone 15, Division 193, Unit 45.",
+   "geometry": [
+    [
+     80.25,
+     12.99
+    ],
+    [
+     80.2508,
+     12.9925
+    ],
+    [
+     80.2515,
+     12.995
+    ],
+    [
+     80.2524,
+     12.9975
+    ]
+   ],
+   "slips": 0,
+   "source": "import",
+   "tender_id": null,
+   "source_url": "https://gittigo.com/tender/authority/Corporation-of-Chennai",
+   "dates_estimated": true
+  },
+  {
+   "ref": "CT-017",
+   "department": "Corporation Works",
+   "planned_start": "2026-12-14",
+   "planned_end": "2027-01-04",
+   "original_end": "2027-01-04",
+   "title": "Restoration of Road Cut (BT Road) made by CMWSSB at Balamurugan Garden 6th Street",
+   "work_type": "Road",
+   "area": "Zone 15 Sholinganallur",
+   "contractor": "To be announced",
+   "state": null,
+   "progress": 0,
+   "budget_inr": 252000,
+   "delay_reason": null,
+   "description": "Restoration of the road after a cut made by the water board (CMWSSB). Amount is the tender amount in the listing. The listing does not give work dates, so the dates here are placeholders. Zone 15, Division 193, Unit 45.",
+   "geometry": [
+    [
+     80.252,
+     13.006
+    ],
+    [
+     80.2545,
+     13.0062
+    ],
+    [
+     80.257,
+     13.0065
+    ],
+    [
+     80.2595,
+     13.0066
+    ]
+   ],
+   "slips": 0,
+   "source": "import",
+   "tender_id": null,
+   "source_url": "https://gittigo.com/tender/authority/Corporation-of-Chennai",
+   "dates_estimated": true
+  }
+ ],
+ "updates": []
+}

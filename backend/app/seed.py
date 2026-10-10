@@ -1,16 +1,62 @@
 """Demo data. Safe to run repeatedly: it only seeds an empty database.
 Every record is marked source="demo" and is fictional. Road geometry comes from
 data/roads_demo.geojson (OpenStreetMap) when present."""
+import json
 from datetime import date, timedelta
+from pathlib import Path
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
-from .models import Department, Project, Report
+from .models import Department, Project, ProjectUpdate, Report
 from .services.geometry import centroid
 from .services.roads import load_roads
 
 DEPTS = ["Roads & Highways", "Stormwater Department", "Water Supply Board", "Electricity Board", "Corporation Works"]
+
+
+SEED_FILE = Path(__file__).resolve().parents[1] / "data" / "seed_data.json"
+
+
+def ensure_departments(db: Session, extra=()):
+    have = {d.name for d in db.query(Department)}
+    for n in [*DEPTS, *extra]:
+        if n not in have:
+            db.add(Department(name=n))
+            have.add(n)
+    db.commit()
+
+
+def _d(v):
+    return date.fromisoformat(v) if v else None
+
+
+def load_seed_file(db: Session) -> bool:
+    """Load the real baseline records from data/seed_data.json into an EMPTY database.
+    Create the file with: python scripts/export_seed_data.py"""
+    if db.query(Project).count() > 0 or not SEED_FILE.exists():
+        return False
+    data = json.loads(SEED_FILE.read_text(encoding="utf-8"))
+    ensure_departments(db, data.get("departments", []))
+    D = {d.name: d for d in db.query(Department)}
+    made = {}
+    for p in data["projects"]:
+        row = dict(p)
+        ref, dept = row.pop("ref"), D[row.pop("department")]
+        for k in ("planned_start", "planned_end", "original_end"):
+            row[k] = _d(row[k])
+        proj = Project(code=f"tmp-{uuid4().hex[:10]}", department_id=dept.id, **row)
+        db.add(proj)
+        db.flush()
+        proj.code = f"CT-{proj.id:03d}"
+        made[ref] = proj
+    for u in data.get("updates", []):
+        proj = made.get(u["project"])
+        if proj:
+            db.add(ProjectUpdate(project_id=proj.id, kind=u["kind"], old_end=_d(u.get("old_end")), new_end=_d(u.get("new_end")),
+                                 reason=u.get("reason", ""), by_department=u["by_department"]))
+    db.commit()
+    return True
 
 
 def _p(db, dept, road, **kw):
