@@ -246,9 +246,6 @@ CivicTrack/
 - Enhanced historical analytics and reporting.
 - Automated deployment and expanded integration testing.
 
-## License
-
-No license has been specified yet. Add a `LICENSE` file if you intend to distribute this project as open source.
 
 ---
 
