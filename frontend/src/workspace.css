@@ -68,3 +68,5 @@
 .ws-link{background:none;border:1px solid var(--ct-border,#d5dde8);color:var(--ct-ink,#172b4d)}
 .ws-who{display:inline-flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;margin-right:8px}
 @media (max-width:640px){.ws-who{display:none}}
+
+.ws-modal.wide{width:min(880px,96vw);max-height:92vh;overflow:auto}

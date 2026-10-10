@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { AlertTriangle, CheckCircle2, Download, Upload } from "lucide-react";
 import { api, type Session } from "../api";
+import MapPicker from "./MapPicker";
+import type { Pt } from "../geo";
 import type { CellValue, ImportPreview, ImportResult, PreviewRow, Road } from "../types";
 
 interface Row extends PreviewRow { include: boolean; }
@@ -23,6 +25,17 @@ export default function CsvImport({ roads, onImported }: { roads: Road[]; sessio
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const [result, setResult] = useState<ImportResult | null>(null);
+  const [placing, setPlacing] = useState<number | null>(null);
+  const [draft, setDraft] = useState<Pt[] | null>(null);
+  const [draftRoad, setDraftRoad] = useState<string | null>(null);
+
+  function applyPlace() {
+    if (placing === null || !draft) return;
+    const name = draftRoad ?? "Drawn on map";
+    setRows(rs => rs.map((r, k) => k !== placing ? r : { ...r, road: name, geometry: draft, values: { ...r.values, road: name },
+      include: r.errors.every(e => e.startsWith("Road")) }));
+    setPlacing(null); setDraft(null); setDraftRoad(null);
+  }
 
   async function load(f: File | undefined) {
     if (!f) return;
@@ -107,7 +120,8 @@ export default function CsvImport({ roads, onImported }: { roads: Road[]; sessio
                       <option value="">Choose road…</option>
                       {[...r.suggestions, ...roads.map(x => x.name).filter(n => !r.suggestions.includes(n))].map(n => <option key={n}>{n}</option>)}
                     </select>
-                  : String(r.road)}</td>
+                  : <>{String(r.road)}{r.road === "Drawn on map" && <div className="ws-sub">placed by you</div>}</>}
+                  {(needRoad || r.road === "Drawn on map") && <button type="button" className="ws-chip" style={{ marginTop: 6 }} onClick={() => { setDraft(null); setDraftRoad(null); setPlacing(i); }}>{needRoad ? "Place on map" : "Change location"}</button>}</td>
                 <td>{String(r.values.planned_start)}<div className="ws-sub">to {String(r.values.planned_end)}</div></td>
                 <td>{money(r.values.budget_inr)}</td>
                 <td>{errs.length ? <ul className="ws-cell-errors">{errs.map((m, k) => <li key={k}>{m}</li>)}</ul>
@@ -127,6 +141,17 @@ export default function CsvImport({ roads, onImported }: { roads: Road[]; sessio
 
       {preview && rows.length === 0 && !preview.file_errors.length && <div className="ws-error">No data rows were found in this file.</div>}
       {preview && rows.length === 0 && <button className="ws-chip" onClick={() => setPreview(null)}>Try another file</button>}
+
+      {placing !== null && rows[placing] && (
+        <div className="modal-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) setPlacing(null); }}>
+          <section className="ws-modal wide" role="dialog" aria-modal="true" aria-label="Place the project on the map">
+            <h2>Place this project on the map</h2>
+            <p className="ws-muted"><strong>{String(rows[placing].values.title)}</strong><br />Area: {String(rows[placing].values.area)}. Zoom and pan to the street (the map shows street names), then pick a road or draw the route.</p>
+            <MapPicker roads={roads} projects={[]} value={draft} onChange={(g, name) => { setDraft(g); setDraftRoad(name ?? null); }} />
+            <div className="ws-actions"><button className="ws-primary" disabled={!draft} onClick={applyPlace}>Use this location</button><button className="ws-chip" onClick={() => setPlacing(null)}>Cancel</button></div>
+          </section>
+        </div>
+      )}
 
       {result && <div className="ws-result">
         <div className="ws-success"><CheckCircle2 size={18} /><div><strong>{result.created} project{result.created === 1 ? "" : "s"} imported.</strong> They are now visible to residents.{result.rejected > 0 && ` ${result.rejected} could not be saved.`}</div></div>

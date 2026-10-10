@@ -1,3 +1,4 @@
+import DashboardProjectMap from "./components/DashboardProjectMap";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity, AlertTriangle, ArrowDownRight, ArrowUpRight, CalendarDays,
@@ -10,20 +11,6 @@ import { api, getSession, saveSession, type Session } from "./api";
 import SignInModal from "./components/SignInModal";
 import Workspace from "./components/Workspace";
 
-const fallbackProjects: Project[] = [
-  { id: "CT-001", title: "Lake View Road resurfacing", work_type: "Road", area: "Adyar", department: "Roads & Highways", contractor: "MetroBuild Works", planned_start: "2026-10-01", planned_end: "2026-10-24", status: "Ongoing", progress: 55, budget_inr: 4200000, road_segment_id: "ROAD-ADYAR-01", description: "Resurfacing and footpath repair on the Lake View Road corridor." },
-  { id: "CT-002", title: "Lake View Road drainage upgrade", work_type: "Drainage", area: "Adyar", department: "Stormwater Department", contractor: "BlueLine Infra", planned_start: "2026-10-15", planned_end: "2026-11-05", status: "Delayed", progress: 30, budget_inr: 3100000, delay_reason: "Utility relocation is taking longer than planned.", road_segment_id: "ROAD-ADYAR-01", description: "Drainage capacity improvements along the same road corridor." },
-  { id: "CT-003", title: "Community water pipeline renewal", work_type: "Water", area: "Velachery", department: "Water Supply Board", contractor: "ClearFlow Projects", planned_start: "2026-09-12", planned_end: "2026-10-12", status: "Completed", progress: 100, budget_inr: 1850000, road_segment_id: "ROAD-VEL-02", description: "Replacement of an aging water pipeline and restoration of the road surface." },
-  { id: "CT-004", title: "School Zone footpath repairs", work_type: "Footpath", area: "Guindy", department: "Roads & Highways", contractor: "SafeStreet Civil", planned_start: "2026-10-20", planned_end: "2026-11-08", status: "Planned", progress: 0, budget_inr: 1250000, road_segment_id: "ROAD-GUI-04", description: "Footpath repairs and accessibility improvements near a school zone." },
-  { id: "CT-005", title: "Market Street resurfacing", work_type: "Road", area: "T. Nagar", department: "Roads & Highways", contractor: "MetroBuild Works", planned_start: "2026-10-08", planned_end: "2026-10-29", status: "Ongoing", progress: 68, budget_inr: 2750000, road_segment_id: "ROAD-TN-03", description: "Road surface repairs and repainting of pedestrian crossings." },
-];
-const fallbackConflicts: Conflict[] = [{
-  id: "CT-001-CT-002", project_a: "CT-001", project_a_title: "Lake View Road resurfacing", project_b: "CT-002",
-  project_b_title: "Lake View Road drainage upgrade", area: "Adyar", road_segment_id: "ROAD-ADYAR-01",
-  overlap_start: "2026-10-15", overlap_end: "2026-10-24",
-  message: "These projects are scheduled on the same road segment during overlapping dates. Review the schedules together."
-}];
-
 const fmtMoney = (amount: number) => amount >= 10000000
   ? `₹${(amount / 10000000).toFixed(2)} Cr`
   : amount >= 100000 ? `₹${(amount / 100000).toFixed(1)} L` : `₹${amount.toLocaleString("en-IN")}`;
@@ -35,15 +22,16 @@ function StatusPill({ status }: { status: ProjectStatus }) {
 }
 
 export default function App() {
-  const [projects, setProjects] = useState<Project[]>(fallbackProjects);
-  const [conflicts, setConflicts] = useState<Conflict[]>(fallbackConflicts);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [conflicts, setConflicts] = useState<Conflict[]>([]);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [selected, setSelected] = useState<Project | null>(null);
   const [tab, setTab] = useState<"projects" | "coordination" | "workspace">("projects");
   const [mobileNav, setMobileNav] = useState(false);
   const [apiLive, setApiLive] = useState(false);
-  const [selectedMapArea, setSelectedMapArea] = useState("Adyar");
+  const [loaded, setLoaded] = useState(false);
+  const [selectedMapArea, setSelectedMapArea] = useState("");
   const [session, setSession] = useState<Session | null>(getSession());
   const [showSignIn, setShowSignIn] = useState(false);
 
@@ -52,12 +40,35 @@ export default function App() {
     window.addEventListener("ct-session", h);
     return () => window.removeEventListener("ct-session", h);
   }, []);
+  useEffect(() => {
+    if (!projects.length || projects.some(p => p.area.toLowerCase() === selectedMapArea.toLowerCase())) return;
+    const counts = new Map<string, number>();
+    projects.forEach(p => counts.set(p.area, (counts.get(p.area) ?? 0) + 1));
+    setSelectedMapArea([...counts.entries()].sort((a, b) => b[1] - a[1])[0][0]);
+  }, [projects, selectedMapArea]);
   const signOut = () => { saveSession(null); if (tab === "workspace") setTab("projects"); };
 
-  const refresh = useCallback(() => Promise.all([api.projects(), api.conflicts()])
-    .then(([p, c]) => { setProjects(p); setConflicts(c); setApiLive(true); })
-    .catch(() => { setApiLive(false); /* keep the built-in preview data if the API is not running */ }), []);
-  useEffect(() => { refresh(); }, [refresh]);
+  const refresh = useCallback(async () => {
+    try {
+      const [p, c] = await Promise.all([
+        api.projects(),
+        api.conflicts(),
+      ]);
+      
+      setProjects(p);
+      setConflicts(c);
+      setApiLive(true);
+      setLoaded(true);
+    } catch (error) {
+      setApiLive(false);
+      setLoaded(true);
+      console.error("Failed to refresh CivicTrack data:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+        void refresh();
+      }, [refresh]);
 
   const filtered = useMemo(() => projects.filter(p => {
     const text = `${p.title} ${p.area} ${p.department} ${p.contractor} ${p.work_type}`.toLowerCase();
@@ -65,7 +76,7 @@ export default function App() {
   }), [projects, query, status]);
 
   const stats = [
-    { label: "Total projects", value: projects.length.toString(), note: "Across demo neighbourhoods", icon: Construction, tone: "blue" },
+    { label: "Total projects", value: projects.length.toString(), note: `Across ${new Set(projects.map(p => p.area)).size} areas`, icon: Construction, tone: "blue" },
     { label: "Ongoing works", value: projects.filter(p => p.status === "Ongoing").length.toString(), note: "Currently in progress", icon: Activity, tone: "purple" },
     { label: "Delayed projects", value: projects.filter(p => p.status === "Delayed").length.toString(), note: "Need closer monitoring", icon: Clock3, tone: "orange" },
     { label: "Completed", value: projects.filter(p => p.status === "Completed").length.toString(), note: "Marked as finished", icon: CheckCircle2, tone: "green" },
@@ -90,7 +101,7 @@ export default function App() {
             <strong>Built for public trust</strong>
             <p style={{ color: "#135def" }}>Clear project details help residents understand what is happening in their neighbourhood.</p>
           </div>
-          <div className="sidebar-footer"><span className="online-dot" />Demo environment <span className="version">v0.1</span></div>
+          <div className="sidebar-footer"><span className="online-dot" />Public works tracker <span className="version">v0.2</span></div>
         </div>
       </aside>
 
@@ -98,7 +109,7 @@ export default function App() {
         <header className="topbar">
           <button className="mobile-menu icon-button" onClick={() => setMobileNav(true)} aria-label="Open menu"><Menu size={21} /></button>
           <div className="breadcrumb">Workspace <ChevronRight size={14} /> <strong>{tab === "coordination" ? "Coordination alerts" : tab === "workspace" ? "Department workspace" : "Overview"}</strong></div>
-          <div className="topbar-right"><span className={`api-indicator ${apiLive ? "api-live" : ""}`}><span /> {apiLive ? "API connected" : "Demo preview"}</span>{session
+          <div className="topbar-right"><span className={`api-indicator ${apiLive ? "api-live" : ""}`}><span /> {!loaded ? "Connecting…" : apiLive ? "Connected to database" : "Server offline"}</span>{session
             ? <><span className="ws-who"><Building2 size={14} />{session.department.name}</span><button className="ws-link" onClick={signOut}><LogOut size={14} />Sign out</button></>
             : <button className="ws-signin" onClick={() => setShowSignIn(true)}><LogIn size={15} />Department sign-in</button>}</div>
         </header>
@@ -128,6 +139,7 @@ export default function App() {
             </div>
           </div>
 
+          {loaded && !apiLive && <div className="ws-error" role="alert">Cannot reach the server, so no live records can be shown. Start the backend (uvicorn) and refresh the page.</div>}
           {tab === "workspace" ? (session
             ? <Workspace session={session} projects={projects} onChanged={refresh} />
             : <section className="ws-card"><h2>Department sign-in required</h2><p className="ws-muted">Only a signed-in department can add or import project details.</p><button className="ws-primary" onClick={() => setShowSignIn(true)}>Department sign-in</button></section>
@@ -154,42 +166,33 @@ export default function App() {
             <section className="command-grid">
               <article className="map-panel">
                 <div className="command-panel-heading">
-                  <div><span className="panel-kicker"><span className="live-pulse" /> SPATIAL INTELLIGENCE</span><h2>Infrastructure watch</h2><p>Explore demo work zones and shared corridors.</p></div>
+                  <div><span className="panel-kicker"><span className="live-pulse" /> SPATIAL INTELLIGENCE</span><h2>Infrastructure watch</h2><p>Explore work zones and shared corridors.</p></div>
                   <span className="map-chip"><MapPinned size={14} /> Chennai region</span>
                 </div>
-                <div className="city-map">
-                  <div className="map-grid-lines" />
-                  <svg className="map-streets" viewBox="0 0 700 340" preserveAspectRatio="none" aria-hidden="true">
-                    <path d="M-30 70 C120 115 155 30 270 85 S470 170 730 80" />
-                    <path d="M-20 260 C140 190 215 305 350 225 S545 155 730 260" />
-                    <path d="M90 -20 C150 85 105 160 210 365" />
-                    <path d="M325 -20 C275 80 390 155 335 365" />
-                    <path d="M555 -20 C480 85 590 205 520 365" />
-                    <path className="street-highlight" d="M-20 165 C120 125 210 205 345 150 S555 120 730 175" />
-                    <path className="waterway" d="M0 310 C130 265 170 330 280 285 S490 260 700 300" />
-                  </svg>
-                  <div className="map-zone zone-one"><span>ADYAR</span></div>
-                  <div className="map-zone zone-two"><span>VELACHERY</span></div>
-                  <div className="map-zone zone-three"><span>GUINDY</span></div>
-                  <button className={`map-marker marker-adyar ${selectedMapArea === "Adyar" ? "marker-selected" : ""}`} onClick={() => setSelectedMapArea("Adyar")} aria-label="Select Adyar work zone"><span className="marker-ring" /><span className="marker-core" /><span className="marker-tooltip">Adyar · 2 works</span></button>
-                  <button className={`map-marker marker-velachery ${selectedMapArea === "Velachery" ? "marker-selected" : ""}`} onClick={() => setSelectedMapArea("Velachery")} aria-label="Select Velachery work zone"><span className="marker-ring" /><span className="marker-core" /><span className="marker-tooltip">Velachery · 1 work</span></button>
-                  <button className={`map-marker marker-guindy ${selectedMapArea === "Guindy" ? "marker-selected" : ""}`} onClick={() => setSelectedMapArea("Guindy")} aria-label="Select Guindy work zone"><span className="marker-ring" /><span className="marker-core" /><span className="marker-tooltip">Guindy · 1 work</span></button>
-                  <button className={`map-marker marker-tnagar ${selectedMapArea === "T. Nagar" ? "marker-selected" : ""}`} onClick={() => setSelectedMapArea("T. Nagar")} aria-label="Select T Nagar work zone"><span className="marker-ring" /><span className="marker-core" /><span className="marker-tooltip">T. Nagar · 1 work</span></button>
-                  <div className="map-scale"><span /> DEMO MAP · NOT FOR NAVIGATION</div>
-                  <div className="map-legend"><span><i className="legend-dot risk" />Conflict risk</span><span><i className="legend-dot active" />Active work</span><span><i className="legend-dot done" />Completed</span></div>
-                  <div className="map-crosshair"><LocateFixed size={17} /></div>
-                </div>
+                  <DashboardProjectMap
+                    projects={projects}
+                    selectedArea={selectedMapArea}
+                    onSelectProject={setSelected}
+                    onSelectArea={setSelectedMapArea}
+                  />
                 <div className="map-selected-row">
                   <div className="selected-area-icon"><Layers3 size={17} /></div>
-                  <div className="selected-area-copy"><span>SELECTED ZONE</span><strong>{selectedMapArea}</strong></div>
-                  <div className="selected-area-count"><strong>{projects.filter(p => p.area === selectedMapArea).length}</strong><span>demo works</span></div>
+                  <div className="selected-area-copy"><span>SELECTED ZONE</span><strong>{selectedMapArea || "No projects yet"}</strong></div>
+                  <div className="selected-area-count">
+                    <strong>
+                      {projects.filter(
+                        p => p.area.toLowerCase() === selectedMapArea.toLowerCase()
+                      ).length}
+                    </strong>
+                    <span>projects</span>
+                  </div>
                   <button className="map-view-button" onClick={() => { setQuery(selectedMapArea); setTab("projects"); }}>Explore zone <ChevronRight size={15} /></button>
                 </div>
               </article>
               <article className="intel-panel">
                 <div className="command-panel-heading"><div><span className="panel-kicker">SYSTEM INTELLIGENCE</span><h2>At a glance</h2><p>Signals calculated from current records.</p></div><div className="intel-icon"><Zap size={18} /></div></div>
                 <div className="intel-risk-card">
-                  <div className="risk-top"><span>COORDINATION RISK</span><span className="risk-badge"><span /> REVIEW</span></div>
+                  <div className="risk-top"><span>COORDINATION RISK</span><span className="risk-badge"><span /> {conflicts.length ? "REVIEW" : "CLEAR"}</span></div>
                   <div className="risk-number">{conflicts.length.toString().padStart(2, "0")}<span> flagged overlap{conflicts.length === 1 ? "" : "s"}</span></div>
                   <p>{conflicts.length ? "Two work packages may affect the same corridor during overlapping dates." : "No schedule overlaps are flagged in the current records."}</p>
                   <button onClick={() => setTab("coordination")}>Inspect risk signal <ChevronRight size={15} /></button>
@@ -201,7 +204,7 @@ export default function App() {
                     return <div className="breakdown-row" key={s}><div className="breakdown-label"><span className={`breakdown-dot dot-${s.toLowerCase()}`} />{s}<strong>{count}</strong></div><div className="breakdown-track"><span className={`breakdown-fill fill-${s.toLowerCase()}`} style={{ width: `${pct}%` }} /></div></div>;
                   })}
                 </div>
-                <div className="intel-footnote"><ShieldCheck size={15} /><span>Illustrative insights from demo records. Verify with departments before acting.</span></div>
+                <div className="intel-footnote"><ShieldCheck size={15} /><span>Calculated from {projects.length} records in the database.{projects.some(p => p.source === "demo") ? " Some are fictional demo records." : ""} Verify with departments before acting.</span></div>
               </article>
             </section>
 
@@ -237,7 +240,7 @@ export default function App() {
                   </div>
                 </article>)}
               </div>
-              {filtered.length === 0 && <div className="empty-state"><Search size={26} /><strong>No projects found</strong><span>Try a different search or status filter.</span><button onClick={() => { setQuery(""); setStatus("All"); }}>Clear filters</button></div>}
+              {filtered.length === 0 && <div className="empty-state"><Search size={26} /><strong>{projects.length === 0 ? "No projects yet" : "No projects found"}</strong><span>{projects.length === 0 ? (loaded && !apiLive ? "The server is not reachable. Start the backend and refresh." : "A signed-in department can add a project or import a CSV file.") : "Try a different search or status filter."}</span>{projects.length > 0 && <button onClick={() => { setQuery(""); setStatus("All"); }}>Clear filters</button>}</div>}
             </section>
           </> : <section className="alerts-section">
             <div className="alert-intro"><div className="alert-intro-icon"><AlertTriangle size={22} /></div><div><h2>Potential schedule overlaps</h2><p>These are coordination suggestions, not confirmed service disruptions. A department should review each alert.</p></div></div>
@@ -247,7 +250,7 @@ export default function App() {
               <div className="conflict-details"><div><span>{c.overlap_start ? "Overlapping dates" : "Schedule gap"}</span><strong>{c.overlap_start && c.overlap_end ? `${fmtDate(c.overlap_start)} – ${fmtDate(c.overlap_end)}` : `${Math.max(c.gap_days ?? 0, 0)} days apart`}</strong></div><div><span>Location relationship</span><strong>{c.kind === "nearby" ? "Right next to each other" : c.kind === "same_stretch" ? `Same stretch${c.shared_m ? ` (about ${c.shared_m} m)` : ""}` : (c.road_segment_id ?? "Same road")}</strong></div></div>
               <p className="conflict-explanation">{c.message}</p>
               <div className="conflict-footer"><span><ShieldCheck size={15} /> Human review required</span><button onClick={() => { const p = projects.find(x => x.id === c.project_a); if (p) setSelected(p); }}>Inspect project <ChevronRight size={15} /></button></div>
-            </article>) : <div className="empty-state"><CheckCircle2 size={28} /><strong>No overlaps found</strong><span>There are no matching schedule overlaps in the current demo records.</span></div>}
+            </article>) : <div className="empty-state"><CheckCircle2 size={28} /><strong>No overlaps found</strong><span>There are no matching schedule overlaps in the current records.</span></div>}
             <div className="method-note"><strong>How this works</strong><p>Each project stores its route as map coordinates. The detector compares routes and flags works on the same stretch of road, or right next to each other, when their dates are within 120 days. It also notices recently finished work. A person should review every alert.</p></div>
           </section>}
 

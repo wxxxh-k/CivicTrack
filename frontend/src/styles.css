@@ -5567,3 +5567,39 @@ body {
                 padding: 20px;
         }
 }
+
+.dashboard-real-map {
+  position: relative;
+  height: 360px;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid #dbe4ea;
+  background: #eaf1f4;
+}
+
+.dashboard-leaflet {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+.dashboard-map-empty {
+  position: absolute;
+  z-index: 500;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #475569;
+  font-size: 13px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.12);
+}
+
+@media (max-width: 640px) {
+  .dashboard-real-map {
+    height: 300px;
+  }
+}

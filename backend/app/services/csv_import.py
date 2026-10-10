@@ -116,10 +116,10 @@ def parse_rows(text: str, road_names: list):
         road_in = g("road")
         road = by_name.get(road_in.casefold())
         if not road_in:
-            errs.append("Road is missing. Pick one in the preview.")
+            errs.append("Road is missing. Choose one in the preview, or place it on the map.")
         elif not road:
             suggestions = difflib.get_close_matches(road_in, road_names, n=3, cutoff=0.5)
-            errs.append(f"Road '{road_in}' is not in the map data. Pick the right one in the preview.")
+            errs.append(f"Road '{road_in}' is not in the map data. Choose a road in the preview, or place it on the map.")
         s, e = parse_date(g("planned_start")), parse_date(g("planned_end"))
         if not s:
             errs.append("Start date not understood (use DD/MM/YYYY or YYYY-MM-DD).")
