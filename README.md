@@ -1,4 +1,3 @@
-```markdown
 # CivicTrack — Public Works Transparency Platform
 
 CivicTrack is a web-based public infrastructure monitoring platform designed to improve transparency and coordination between public works departments. It helps users track infrastructure projects, report on-site issues, monitor project progress, and identify scheduling conflicts between nearby roadworks.
