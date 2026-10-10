@@ -3,8 +3,9 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-WORK_TYPES = ["Road", "Drainage", "Water", "Footpath", "Electricity", "Sewer", "Other"]
-REPORT_CATEGORIES = ["Work stalled", "Poor quality", "Safety hazard", "No signboard", "Other"]
+from .config import SERVICE_BBOX
+from .constants import REPORT_CATEGORIES, WORK_TYPES  # noqa: F401  (re-exported)
+
 
 
 def check_geometry(v):
@@ -13,6 +14,9 @@ def check_geometry(v):
     for pt in v:
         if len(pt) != 2 or not (-180 <= pt[0] <= 180) or not (-90 <= pt[1] <= 90):
             raise ValueError("each point must be [longitude, latitude] within valid ranges")
+        s, w, n, e = SERVICE_BBOX
+        if not (s <= pt[1] <= n and w <= pt[0] <= e):
+            raise ValueError("the location is outside the area this service covers")
     return v
 
 
@@ -26,8 +30,23 @@ class ProjectCreate(BaseModel):
     budget_inr: int = Field(default=0, ge=0)
     description: str = Field(default="", max_length=1000)
     geometry: list[list[float]]
+    tender_id: Optional[str] = Field(default=None, max_length=60)
+    source_url: Optional[str] = Field(default=None, max_length=500)
+    dates_estimated: bool = False
 
     _geo = field_validator("geometry")(check_geometry)
+
+    @field_validator("source_url")
+    @classmethod
+    def url_ok(cls, v):
+        if v and not v.startswith(("http://", "https://")):
+            raise ValueError("source_url must start with http:// or https://")
+        return v or None
+
+    @field_validator("tender_id")
+    @classmethod
+    def tender_blank(cls, v):
+        return (v or "").strip() or None
 
     @field_validator("work_type")
     @classmethod

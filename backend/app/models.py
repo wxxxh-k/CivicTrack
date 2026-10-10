@@ -37,6 +37,9 @@ class Project(Base):
     geometry: Mapped[list] = mapped_column(JSON)  # [[lng, lat], ...]
     slips: Mapped[int] = mapped_column(Integer, default=0)  # times the deadline was pushed later
     source: Mapped[str] = mapped_column(String(12), default="official")  # demo | official | import
+    tender_id: Mapped[Optional[str]] = mapped_column(String(60), nullable=True)
+    source_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    dates_estimated: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     department: Mapped[Department] = relationship()

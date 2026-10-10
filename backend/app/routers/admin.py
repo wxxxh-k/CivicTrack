@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
-from ..config import ADMIN_RESET_KEY
+from ..config import ADMIN_RESET_KEY, MAX_LINE_M, SERVICE_BBOX
 from ..database import get_db
 from ..models import Project, Report, ProjectUpdate, WeatherCache
 from ..seed import seed
@@ -36,3 +36,8 @@ def reset_demo(x_admin_key: Optional[str] = Header(default=None), db: Session = 
     db.commit()
     seed(db)
     return {"reset": True}
+
+
+@router.get("/config")
+def public_config():
+    return {"service_bbox": SERVICE_BBOX, "max_line_m": MAX_LINE_M}

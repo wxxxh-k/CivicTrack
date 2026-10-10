@@ -31,4 +31,5 @@ def project_out(p, today=None):
         "delay_reason": p.delay_reason, "description": p.description, "geometry": p.geometry,
         "slips": p.slips, "days_overdue": days_overdue(p, today), "source": p.source,
         "report_count": len(p.reports),
+        "tender_id": p.tender_id, "source_url": p.source_url, "dates_estimated": p.dates_estimated,
     }

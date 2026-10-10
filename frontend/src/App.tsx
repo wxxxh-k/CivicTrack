@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity, AlertTriangle, ArrowDownRight, ArrowUpRight, CalendarDays,
   CheckCircle2, ChevronRight, CircleDollarSign, Clock3, Construction,
   FileText, Filter, MapPin, Menu, Search, ShieldCheck, SlidersHorizontal,
-  TrendingUp, X, Layers3, LocateFixed, Waves, Zap, MapPinned
+  TrendingUp, X, Layers3, LocateFixed, Waves, Zap, MapPinned, LogIn, LogOut, Building2
 } from "lucide-react";
 import type { Conflict, Project, ProjectStatus } from "./types";
+import { api, getSession, saveSession, type Session } from "./api";
+import SignInModal from "./components/SignInModal";
+import Workspace from "./components/Workspace";
 
 const fallbackProjects: Project[] = [
   { id: "CT-001", title: "Lake View Road resurfacing", work_type: "Road", area: "Adyar", department: "Roads & Highways", contractor: "MetroBuild Works", planned_start: "2026-10-01", planned_end: "2026-10-24", status: "Ongoing", progress: 55, budget_inr: 4200000, road_segment_id: "ROAD-ADYAR-01", description: "Resurfacing and footpath repair on the Lake View Road corridor." },
@@ -24,6 +27,7 @@ const fallbackConflicts: Conflict[] = [{
 const fmtMoney = (amount: number) => amount >= 10000000
   ? `₹${(amount / 10000000).toFixed(2)} Cr`
   : amount >= 100000 ? `₹${(amount / 100000).toFixed(1)} L` : `₹${amount.toLocaleString("en-IN")}`;
+const sourceLabel = (s?: string) => s === "official" ? "Department entry" : s === "import" ? "Department CSV import" : "Fictional demo record";
 const fmtDate = (date: string) => new Date(`${date}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
 function StatusPill({ status }: { status: ProjectStatus }) {
@@ -36,19 +40,24 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [selected, setSelected] = useState<Project | null>(null);
-  const [tab, setTab] = useState<"projects" | "coordination">("projects");
+  const [tab, setTab] = useState<"projects" | "coordination" | "workspace">("projects");
   const [mobileNav, setMobileNav] = useState(false);
   const [apiLive, setApiLive] = useState(false);
   const [selectedMapArea, setSelectedMapArea] = useState("Adyar");
+  const [session, setSession] = useState<Session | null>(getSession());
+  const [showSignIn, setShowSignIn] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/projects").then(r => { if (!r.ok) throw new Error("API"); return r.json(); }),
-      fetch("/api/conflicts").then(r => { if (!r.ok) throw new Error("API"); return r.json(); })
-    ]).then(([p, c]) => {
-      setProjects(p); setConflicts(c); setApiLive(true);
-    }).catch(() => { /* Keep built-in demo data available if the API is not running. */ });
+    const h = () => setSession(getSession());
+    window.addEventListener("ct-session", h);
+    return () => window.removeEventListener("ct-session", h);
   }, []);
+  const signOut = () => { saveSession(null); if (tab === "workspace") setTab("projects"); };
+
+  const refresh = useCallback(() => Promise.all([api.projects(), api.conflicts()])
+    .then(([p, c]) => { setProjects(p); setConflicts(c); setApiLive(true); })
+    .catch(() => { setApiLive(false); /* keep the built-in preview data if the API is not running */ }), []);
+  useEffect(() => { refresh(); }, [refresh]);
 
   const filtered = useMemo(() => projects.filter(p => {
     const text = `${p.title} ${p.area} ${p.department} ${p.contractor} ${p.work_type}`.toLowerCase();
@@ -74,6 +83,7 @@ export default function App() {
         <button className="nav-item active" onClick={() => { setTab("projects"); setMobileNav(false); }}><Activity size={18} />Overview</button>
         <button className={`nav-item ${tab === "projects" ? "subtle-active" : ""}`} onClick={() => { setTab("projects"); setMobileNav(false); }}><FileText size={18} />Public projects<span className="nav-count">{projects.length}</span></button>
         <button className={`nav-item ${tab === "coordination" ? "subtle-active" : ""}`} onClick={() => { setTab("coordination"); setMobileNav(false); }}><AlertTriangle size={18} />Coordination alerts{conflicts.length > 0 && <span className="nav-count alert-count">{conflicts.length}</span>}</button>
+        {session && <button className={`nav-item ${tab === "workspace" ? "subtle-active" : ""}`} onClick={() => { setTab("workspace"); setMobileNav(false); }}><Building2 size={18} />Department workspace</button>}
         <div className="sidebar-bottom">
           <div className="transparency-card">
             <div className="transparency-icon"><ShieldCheck size={19} /></div>
@@ -87,18 +97,20 @@ export default function App() {
       <main className="main-area">
         <header className="topbar">
           <button className="mobile-menu icon-button" onClick={() => setMobileNav(true)} aria-label="Open menu"><Menu size={21} /></button>
-          <div className="breadcrumb">Workspace <ChevronRight size={14} /> <strong>{tab === "coordination" ? "Coordination alerts" : "Overview"}</strong></div>
-          <div className="topbar-right"><span className={`api-indicator ${apiLive ? "api-live" : ""}`}><span /> {apiLive ? "API connected" : "Demo preview"}</span><div className="avatar">CT</div></div>
+          <div className="breadcrumb">Workspace <ChevronRight size={14} /> <strong>{tab === "coordination" ? "Coordination alerts" : tab === "workspace" ? "Department workspace" : "Overview"}</strong></div>
+          <div className="topbar-right"><span className={`api-indicator ${apiLive ? "api-live" : ""}`}><span /> {apiLive ? "API connected" : "Demo preview"}</span>{session
+            ? <><span className="ws-who"><Building2 size={14} />{session.department.name}</span><button className="ws-link" onClick={signOut}><LogOut size={14} />Sign out</button></>
+            : <button className="ws-signin" onClick={() => setShowSignIn(true)}><LogIn size={15} />Department sign-in</button>}</div>
         </header>
 
         <div className="page-content">
           <div className="page-heading">
             <div>
               <div className="eyebrow"><span className="eyebrow-line" /> CIVIC INFRASTRUCTURE MONITOR</div>
-              <h1>{tab === "coordination" ? "Coordination alerts" : "Public works overview"}</h1>
-              <p className="page-description">{tab === "coordination" ? "Spot scheduling overlaps early and give departments a chance to coordinate." : "A clearer view of the infrastructure projects shaping your neighbourhood."}</p>
+              <h1>{tab === "coordination" ? "Coordination alerts" : tab === "workspace" ? "Department workspace" : "Public works overview"}</h1>
+              <p className="page-description">{tab === "coordination" ? "Spot scheduling overlaps early and give departments a chance to coordinate." : tab === "workspace" ? "Add a project on the map or import many from a CSV file." : "A clearer view of the infrastructure projects shaping your neighbourhood."}</p>
             </div>
-            <div className="demo-badge"><span /> FICTIONAL DEMO DATA</div>
+            <div className="demo-badge"><span /> {projects.some(p => p.source === "demo" || p.source === undefined) ? "INCLUDES FICTIONAL DEMO DATA" : "DEPARTMENT-SUBMITTED DATA"}</div>
           </div>
 
           <div className="signal-ribbon" aria-label="CivicTrack dashboard highlights">
@@ -116,7 +128,10 @@ export default function App() {
             </div>
           </div>
 
-          {tab === "projects" ? <>
+          {tab === "workspace" ? (session
+            ? <Workspace session={session} projects={projects} onChanged={refresh} />
+            : <section className="ws-card"><h2>Department sign-in required</h2><p className="ws-muted">Only a signed-in department can add or import project details.</p><button className="ws-primary" onClick={() => setShowSignIn(true)}>Department sign-in</button></section>
+          ) : tab === "projects" ? <>
             <section className="stats-grid">
               {stats.map((s, i) => <div className="stat-card" key={s.label}>
                 <div className="stat-top"><span className="stat-label">{s.label}</span><span className={`stat-icon ${s.tone}`}><s.icon size={19} /></span></div>
@@ -225,11 +240,11 @@ export default function App() {
             {conflicts.length ? conflicts.map(c => <article className="conflict-card" key={c.id}>
               <div className="conflict-card-top"><span className="conflict-label"><AlertTriangle size={14} /> REVIEW SUGGESTED</span><span className="conflict-area"><MapPin size={14} />{c.area}</span></div>
               <div className="conflict-projects"><div className="conflict-project"><span className="conflict-project-id">{c.project_a}</span><strong>{c.project_a_title}</strong></div><div className="conflict-link"><span /><span /><span /></div><div className="conflict-project"><span className="conflict-project-id">{c.project_b}</span><strong>{c.project_b_title}</strong></div></div>
-              <div className="conflict-details"><div><span>Overlapping dates</span><strong>{fmtDate(c.overlap_start)} – {fmtDate(c.overlap_end)}</strong></div><div><span>Shared road segment</span><strong>{c.road_segment_id}</strong></div></div>
+              <div className="conflict-details"><div><span>{c.overlap_start ? "Overlapping dates" : "Schedule gap"}</span><strong>{c.overlap_start && c.overlap_end ? `${fmtDate(c.overlap_start)} – ${fmtDate(c.overlap_end)}` : `${Math.max(c.gap_days ?? 0, 0)} days apart`}</strong></div><div><span>Location relationship</span><strong>{c.kind === "nearby" ? "Right next to each other" : c.kind === "same_stretch" ? `Same stretch${c.shared_m ? ` (about ${c.shared_m} m)` : ""}` : (c.road_segment_id ?? "Same road")}</strong></div></div>
               <p className="conflict-explanation">{c.message}</p>
               <div className="conflict-footer"><span><ShieldCheck size={15} /> Human review required</span><button onClick={() => { const p = projects.find(x => x.id === c.project_a); if (p) setSelected(p); }}>Inspect project <ChevronRight size={15} /></button></div>
             </article>) : <div className="empty-state"><CheckCircle2 size={28} /><strong>No overlaps found</strong><span>There are no matching schedule overlaps in the current demo records.</span></div>}
-            <div className="method-note"><strong>How this works</strong><p>The starter detector compares projects that use the same road-segment ID and checks whether their planned date ranges overlap. A future PostGIS version can also detect partial geographic overlap and nearby works.</p></div>
+            <div className="method-note"><strong>How this works</strong><p>Each project stores its route as map coordinates. The detector compares routes and flags works on the same stretch of road, or right next to each other, when their dates are within 120 days. It also notices recently finished work. A person should review every alert.</p></div>
           </section>}
 
           <footer className="page-footer"><span>© 2026 CivicTrack · Student hackathon prototype</span><span><ShieldCheck size={14} /> Transparency by design</span></footer>
@@ -245,16 +260,18 @@ export default function App() {
           <div className="detail-grid">
             <div><span>Responsible department</span><strong>{selected.department}</strong></div>
             <div><span>Contractor</span><strong>{selected.contractor}</strong></div>
-            <div><span>Approved demo budget</span><strong>{fmtMoney(selected.budget_inr)}</strong></div>
+            <div><span>Budget</span><strong>{fmtMoney(selected.budget_inr)}</strong></div>
             <div><span>Planned start</span><strong>{fmtDate(selected.planned_start)}</strong></div>
-            <div><span>Target completion</span><strong>{fmtDate(selected.planned_end)}</strong></div>
-            <div><span>Road segment</span><strong>{selected.road_segment_id}</strong></div>
+            <div><span>Target completion</span><strong>{fmtDate(selected.planned_end)}{selected.dates_estimated ? " (estimated)" : ""}</strong></div>
+            <div><span>Record source</span><strong>{sourceLabel(selected.source)}</strong></div>
+            {selected.tender_id && <div><span>Tender ID</span><strong>{selected.source_url ? <a href={selected.source_url} target="_blank" rel="noreferrer">{selected.tender_id}</a> : selected.tender_id}</strong></div>}
           </div>
           {selected.delay_reason && <div className="modal-delay"><AlertTriangle size={17} /><div><strong>Reported delay reason</strong><p>{selected.delay_reason}</p></div></div>}
-          <div className="modal-disclaimer"><ShieldCheck size={17} /><p>These are fictional demonstration records, not official public works data. Progress and budget figures are illustrative.</p></div>
+          <div className="modal-disclaimer"><ShieldCheck size={17} /><p>{selected.source === "official" || selected.source === "import" ? "This record was entered by the responsible department. Progress is as reported by them." : "This is a fictional demonstration record, not official public works data. Progress and budget figures are illustrative."}</p></div>
           <button className="modal-done" onClick={() => setSelected(null)}>Close details</button>
         </section>
       </div>}
+      {showSignIn && <SignInModal onClose={() => setShowSignIn(false)} onSignedIn={() => { setShowSignIn(false); setTab("workspace"); }} />}
     </div>
   );
 }

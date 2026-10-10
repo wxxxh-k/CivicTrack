@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session, joinedload
 
 from ..auth import current_department
+from ..config import MAX_LINE_M
 from ..database import get_db
 from ..models import Department, Project, ProjectUpdate
 from ..schemas import DeadlineUpdate, ProjectCreate
@@ -24,6 +25,14 @@ def get_project_or_404(db: Session, code: str) -> Project:
     if not p:
         raise HTTPException(404, "Project not found")
     return p
+
+
+def check_line(coords):
+    n = length_m(coords)
+    if n < 5:
+        raise HTTPException(422, "The project line is too short. Pick a longer stretch of road.")
+    if n > MAX_LINE_M:
+        raise HTTPException(422, f"The project line is longer than {MAX_LINE_M / 1000:.0f} km. Trim it to the stretch being worked on.")
 
 
 def own_or_403(p: Project, dept: Department):
@@ -72,8 +81,7 @@ def project_updates(code: str, db: Session = Depends(get_db)):
 @router.post("/projects", status_code=201)
 def create_project(body: ProjectCreate, force: bool = False, dept: Department = Depends(current_department),
                    db: Session = Depends(get_db)):
-    if length_m(body.geometry) < 5:
-        raise HTTPException(422, "The project line is too short. Pick a longer stretch of road.")
+    check_line(body.geometry)
     conflicts = find_conflicts(db, body.geometry, body.planned_start, body.planned_end)
     if conflicts and not force:
         return JSONResponse(status_code=409, content=jsonable_encoder({
