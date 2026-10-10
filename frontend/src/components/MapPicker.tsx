@@ -97,7 +97,7 @@ export default function MapPicker({ roads, projects, value, onChange }: Props) {
       </MapContainer>
 
       <p className="ws-hint" aria-live="polite">{hint}</p>
-      <div className="ws-legend"><span><i style={{ background: "#e8590c" }} /> Selected work area</span><span><i style={{ background: "#64748b" }} /> Roads</span>
+      <div className="ws-legend" style={{ color: "#eaebed" }}><span><i style={{ background: "#e8590c" }} /> Selected work area</span><span><i style={{ background: "#64748b" }} /> Roads</span>
         {Object.entries(STATUS_COLOR).slice(0, 4).map(([k, c]) => <span key={k}><i style={{ background: c }} /> {k}</span>)}</div>
       {value && <p className="ws-picked">Selected: about <strong>{Math.round(lengthM(value))} m</strong>{road && mode !== "draw" ? <> on <strong>{road}</strong></> : null}</p>}
     </div>

@@ -22,8 +22,8 @@ export default function Workspace({ session, projects, onChanged }: { session: S
         </div>
       </div>
       <div className="ws-tabs" role="tablist">
-        <button role="tab" aria-selected={view === "form"} className={view === "form" ? "on" : ""} onClick={() => setView("form")}><FilePlus2 size={16} /> Add a project</button>
-        <button role="tab" aria-selected={view === "csv"} className={view === "csv" ? "on" : ""} onClick={() => setView("csv")}><FileSpreadsheet size={16} /> Import from CSV</button>
+        <button role="tab" aria-selected={view === "form"} className={view === "form" ? "on" : ""} onClick={() => setView("form")} style={{ color: "#eaebed" }}><FilePlus2 size={16} /> Add a project</button>
+        <button role="tab" aria-selected={view === "csv"} className={view === "csv" ? "on" : ""} onClick={() => setView("csv")} style={{ color: "#eaebed" }}><FileSpreadsheet size={16} /> Import from CSV</button>
       </div>
       {err && <div className="ws-error">{err} <button className="ws-chip" onClick={load}>Retry</button></div>}
       {!roads && !err && <p className="ws-muted">Loading the map data…</p>}

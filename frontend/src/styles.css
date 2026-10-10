@@ -351,8 +351,8 @@ button {
 }
 
 .stat-label {
-        font-size: 11px;
-        color: #71818d;
+        font-size: 20px;
+        color:#053582;
         font-weight: 500
 }
 
@@ -389,13 +389,13 @@ button {
         font-weight: 800;
         font-size: 27px;
         letter-spacing: -.8px;
-        color: #183346;
+        color: #02385f;
         margin-top: 9px
 }
 
 .stat-note {
         font-size: 10px;
-        color: #98a4ad;
+        color: #334155;
         margin-top: 4px
 }
 

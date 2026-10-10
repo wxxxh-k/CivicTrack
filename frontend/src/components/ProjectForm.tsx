@@ -74,32 +74,42 @@ export default function ProjectForm({ roads, projects, session, onCreated }:
       {done && <div className="ws-success" role="status"><CheckCircle2 size={18} /><div><strong>{done.id} added.</strong> “{done.title}” is now visible to residents.</div></div>}
 
       <div className="ws-grid">
-        <div className="ws-field span2"><label className="ws-label" htmlFor="f-title">Project title *</label>
+        <div className="ws-field span2">
+
+          <label
+            className="ws-label"
+            htmlFor="f-title"
+            style={{ color: "#eaebed" }}
+          >
+            Project title *
+          </label>
+
+
           <input id="f-title" className="ws-input" value={f.title} onChange={e => set("title", e.target.value)} placeholder="e.g. Storm drain repair" /></div>
-        <div className="ws-field"><label className="ws-label" htmlFor="f-type">Work type *</label>
+        <div className="ws-field"><label className="ws-label" htmlFor="f-type" style={{ color: "#eaebed" }}>Work type *</label>
           <select id="f-type" className="ws-input" value={f.work_type} onChange={e => set("work_type", e.target.value)}>{WORK_TYPES.map(t => <option key={t}>{t}</option>)}</select></div>
-        <div className="ws-field"><label className="ws-label" htmlFor="f-area">Area / locality *</label>
+        <div className="ws-field"><label className="ws-label" htmlFor="f-area" style={{ color: "#eaebed" }}>Area / locality *</label>
           <input id="f-area" className="ws-input" value={f.area} onChange={e => set("area", e.target.value)} placeholder="e.g. Adyar" /></div>
-        <div className="ws-field"><label className="ws-label" htmlFor="f-dept">Department</label>
+        <div className="ws-field"><label className="ws-label" htmlFor="f-dept" style={{ color: "#eaebed" }}>Department</label>
           <input id="f-dept" className="ws-input" value={session.department.name} readOnly /></div>
-        <div className="ws-field"><label className="ws-label" htmlFor="f-contractor">Contractor</label>
+        <div className="ws-field"><label className="ws-label" htmlFor="f-contractor" style={{ color: "#eaebed" }}>Contractor</label>
           <input id="f-contractor" className="ws-input" value={f.contractor} onChange={e => set("contractor", e.target.value)} placeholder="Leave blank if not yet awarded" /></div>
-        <div className="ws-field"><label className="ws-label" htmlFor="f-start">Start date *</label>
+        <div className="ws-field"><label className="ws-label" htmlFor="f-start" style={{ color: "#eaebed" }}>Start date *</label>
           <input id="f-start" type="date" className="ws-input" value={f.planned_start} onChange={e => set("planned_start", e.target.value)} /></div>
-        <div className="ws-field"><label className="ws-label" htmlFor="f-end">End date *</label>
+        <div className="ws-field"><label className="ws-label" htmlFor="f-end" style={{ color: "#eaebed" }}>End date *</label>
           <input id="f-end" type="date" className="ws-input" value={f.planned_end} onChange={e => set("planned_end", e.target.value)} /></div>
         <label className="ws-check span2"><input type="checkbox" checked={f.dates_estimated} onChange={e => set("dates_estimated", e.target.checked)} /> These dates are estimates (for example, taken from a tender before work begins)</label>
-        <div className="ws-field"><label className="ws-label" htmlFor="f-budget">Budget (₹)</label>
+        <div className="ws-field"><label className="ws-label" htmlFor="f-budget" style={{ color: "#eaebed" }}>Budget (₹)</label>
           <input id="f-budget" inputMode="numeric" className="ws-input" value={f.budget_inr} onChange={e => set("budget_inr", e.target.value)} placeholder="e.g. 450000" /></div>
-        <div className="ws-field"><label className="ws-label" htmlFor="f-tender">Tender ID</label>
+        <div className="ws-field"><label className="ws-label" htmlFor="f-tender" style={{ color: "#eaebed" }}>Tender ID</label>
           <input id="f-tender" className="ws-input" value={f.tender_id} onChange={e => set("tender_id", e.target.value)} placeholder="If from a public tender" /></div>
-        <div className="ws-field span2"><label className="ws-label" htmlFor="f-url">Source link</label>
+        <div className="ws-field span2"><label className="ws-label" htmlFor="f-url" style={{ color: "#eaebed" }}>Source link</label>
           <input id="f-url" className="ws-input" value={f.source_url} onChange={e => set("source_url", e.target.value)} placeholder="https://… link to the tender or order" /></div>
-        <div className="ws-field span2"><label className="ws-label" htmlFor="f-desc">Description</label>
+        <div className="ws-field span2"><label className="ws-label" htmlFor="f-desc" style={{ color: "#eaebed" }}>Description</label>
           <textarea id="f-desc" className="ws-input" rows={2} value={f.description} onChange={e => set("description", e.target.value)} placeholder="What is being done and why" /></div>
       </div>
 
-      <div className="ws-label" style={{ marginTop: 18 }}>Location on the map *</div>
+      <div className="ws-label" style={{ marginTop: 18 , color: "#eaebed" }}>Location on the map *</div>
       <MapPicker key={pickerKey} roads={roads} projects={projects} value={geometry} onChange={g => setGeometry(g)} />
 
       {checking && <p className="ws-muted">Checking for clashes with other works…</p>}

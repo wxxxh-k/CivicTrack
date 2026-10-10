@@ -76,19 +76,19 @@ export default function App() {
       <aside className={`sidebar ${mobileNav ? "sidebar-open" : ""}`}>
         <div className="brand">
           <div className="brand-mark"><Construction size={22} strokeWidth={2.4} /></div>
-          <div><div className="brand-name">civictrack<span>.</span></div><div className="brand-subtitle">PUBLIC WORKS, IN THE OPEN</div></div>
+          <div><div className="brand-name" style={{ color: "#f31800" }}>civictrack<span></span></div><div className="brand-subtitle" style={{ color: "#135def" }}>PUBLIC WORKS, IN THE OPEN</div></div>
           <button className="mobile-close icon-button" onClick={() => setMobileNav(false)} aria-label="Close menu"><X size={18} /></button>
         </div>
-        <div className="nav-label">WORKSPACE</div>
+        <div className="nav-label" style={{ color: "#020d22" }}>WORKSPACE</div>
         <button className="nav-item active" onClick={() => { setTab("projects"); setMobileNav(false); }}><Activity size={18} />Overview</button>
         <button className={`nav-item ${tab === "projects" ? "subtle-active" : ""}`} onClick={() => { setTab("projects"); setMobileNav(false); }}><FileText size={18} />Public projects<span className="nav-count">{projects.length}</span></button>
         <button className={`nav-item ${tab === "coordination" ? "subtle-active" : ""}`} onClick={() => { setTab("coordination"); setMobileNav(false); }}><AlertTriangle size={18} />Coordination alerts{conflicts.length > 0 && <span className="nav-count alert-count">{conflicts.length}</span>}</button>
         {session && <button className={`nav-item ${tab === "workspace" ? "subtle-active" : ""}`} onClick={() => { setTab("workspace"); setMobileNav(false); }}><Building2 size={18} />Department workspace</button>}
-        <div className="sidebar-bottom">
+        <div className="sidebar-bottom" style={{ color: "#06ff66" }}>
           <div className="transparency-card">
             <div className="transparency-icon"><ShieldCheck size={19} /></div>
             <strong>Built for public trust</strong>
-            <p>Clear project details help residents understand what is happening in their neighbourhood.</p>
+            <p style={{ color: "#135def" }}>Clear project details help residents understand what is happening in their neighbourhood.</p>
           </div>
           <div className="sidebar-footer"><span className="online-dot" />Demo environment <span className="version">v0.1</span></div>
         </div>
@@ -110,7 +110,7 @@ export default function App() {
               <h1>{tab === "coordination" ? "Coordination alerts" : tab === "workspace" ? "Department workspace" : "Public works overview"}</h1>
               <p className="page-description">{tab === "coordination" ? "Spot scheduling overlaps early and give departments a chance to coordinate." : tab === "workspace" ? "Add a project on the map or import many from a CSV file." : "A clearer view of the infrastructure projects shaping your neighbourhood."}</p>
             </div>
-            <div className="demo-badge"><span /> {projects.some(p => p.source === "demo" || p.source === undefined) ? "INCLUDES FICTIONAL DEMO DATA" : "DEPARTMENT-SUBMITTED DATA"}</div>
+            {/* <div className="demo-badge"><span /> {projects.some(p => p.source === "demo" || p.source === undefined) ? "INCLUDES FICTIONAL DEMO DATA" : "DEPARTMENT-SUBMITTED DATA"}</div> */}
           </div>
 
           <div className="signal-ribbon" aria-label="CivicTrack dashboard highlights">
@@ -144,8 +144,12 @@ export default function App() {
             <section className="insight-banner">
               <div className="insight-symbol"><AlertTriangle size={21} /></div>
               <div className="insight-copy"><strong>{conflicts.length} potential scheduling {conflicts.length === 1 ? "conflict" : "conflicts"} detected</strong><span>Some works may overlap on the same road. Reviewing these schedules together could reduce repeated disruption.</span></div>
-              <button className="text-button" onClick={() => setTab("coordination")}>Review alerts <ChevronRight size={16} /></button>
-            </section>
+                <button
+                  className="text-button text-sm px-4 py-2"
+                  onClick={() => setTab("coordination")}
+                >
+                  Review alerts <ChevronRight size={16} />
+                </button>            </section>
 
             <section className="command-grid">
               <article className="map-panel">
@@ -203,7 +207,7 @@ export default function App() {
 
             <section className="projects-section">
               <div className="section-heading">
-                <div><h2>Projects in your area</h2><p>Explore budgets, timelines and delivery status.</p></div>
+                  <div ><h2 style={{ color: "#eaebed" }}>Projects in your area</h2 ><p style={{ color: "#eaebed" }}>Explore budgets, timelines and delivery status.</p></div>
                 <span className="results-count">{filtered.length} projects</span>
               </div>
               <div className="filters-bar">
@@ -247,7 +251,7 @@ export default function App() {
             <div className="method-note"><strong>How this works</strong><p>Each project stores its route as map coordinates. The detector compares routes and flags works on the same stretch of road, or right next to each other, when their dates are within 120 days. It also notices recently finished work. A person should review every alert.</p></div>
           </section>}
 
-          <footer className="page-footer"><span>© 2026 CivicTrack · Student hackathon prototype</span><span><ShieldCheck size={14} /> Transparency by design</span></footer>
+          <footer className="page-footer" style={{ color: "#eaebed" }}><span>© 2026 CivicTech </span><span><ShieldCheck size={14} /> Transparency by design</span></footer>
         </div>
       </main>
 

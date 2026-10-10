@@ -28,7 +28,10 @@ export default function SignInModal({ onClose, onSignedIn }: { onClose: () => vo
           <span className="ws-kicker"><Building2 size={14} /> DEPARTMENT ACCESS</span>
           <button className="icon-button" onClick={onClose} aria-label="Close"><X size={18} /></button>
         </div>
-        <h2 id="signin-title">Sign in to add project details</h2>
+
+        <h2 id="signin-title" style={{ color: "#002272" }}>
+          Sign in to add project details
+        </h2>
         <p className="ws-muted">Only a signed-in department can add or import projects. Residents can view everything without signing in.</p>
         <label className="ws-label" htmlFor="dept-select">Department</label>
         <select id="dept-select" className="ws-input" value={sel} onChange={e => setSel(Number(e.target.value))}>
